@@ -27,18 +27,29 @@ app.get('/', (req, res) => {
 });
 // POST endpoint to scrape external page
 app.post('/scrape', async (req, res) => {
-  const { url } = req.body;
-
-  if (!url) {
-    return res.status(400).json({ error: 'Missing URL in request body' });
-  }
-
   try {
+    const { url } = req.body;
+
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'Invalid or missing URL in request body.' });
+    }
+
     const response = await fetch(url);
+
+    if (!response.ok) {
+      return res.status(502).json({
+        error: 'Failed to fetch the target URL',
+        status: response.status,
+        statusText: response.statusText
+      });
+    }
+
     const html = await response.text();
-    res.json({ html });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch target URL', details: error.message });
+    res.status(200).json({ html });
+
+  } catch (err) {
+    console.error('Scrape Error:', err.message);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 });
 
