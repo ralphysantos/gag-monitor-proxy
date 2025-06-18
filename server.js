@@ -34,7 +34,10 @@ app.post('/scrape', async (req, res) => {
     return res.status(400).json({ error: 'Invalid or missing URL in request body.' });
   }
   try {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined, // Use the default path if not set
+      headless: true, // Run in headless mode
+    });
     const page = await browser.newPage();
     
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
