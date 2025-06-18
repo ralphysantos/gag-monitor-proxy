@@ -34,7 +34,12 @@ app.post('/scrape', async (req, res) => {
       return res.status(400).json({ error: 'Invalid or missing URL in request body.' });
     }
 
-    const response = await fetch(url);
+    const response = await fetch(url,{  headers: {
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+      '(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+    'Accept': 'text/html'
+  }});
 
     if (!response.ok) {
       return res.status(502).json({
