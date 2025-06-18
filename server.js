@@ -17,7 +17,14 @@ app.use((req, res, next) => {
   }
   next();
 });
-
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Gag Monitor Proxy is running',
+    endpoint: '/scrape',
+    timestamp: new Date().toISOString()
+  });
+});
 // POST endpoint to scrape external page
 app.post('/scrape', async (req, res) => {
   const { url } = req.body;
