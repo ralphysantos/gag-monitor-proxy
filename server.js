@@ -27,31 +27,19 @@ app.get('/', (req, res) => {
 });
 // POST endpoint to scrape external page
 app.post('/scrape', async (req, res) => {
+  const { url } = req.body;
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ error: 'Invalid or missing URL in request body.' });
+  }
   try {
-    const { url } = req.body;
-
-    if (!url || typeof url !== 'string') {
-      return res.status(400).json({ error: 'Invalid or missing URL in request body.' });
-    }
-
-    const response = await fetch(url,{  headers: {
-    'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-      '(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-    'Accept': 'text/html'
-  }});
-
-    if (!response.ok) {
-      return res.status(502).json({
-        error: 'Failed to fetch the target URL',
-        status: response.status,
-        statusText: response.statusText
-      });
-    }
-
-    const html = await response.text();
-    res.status(200).json({ html });
-
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    
+    await page.setUser Agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
+    await page.goto(url, { waitUntil: 'networkidle2' });
+    const content = await page.content();
+    await browser.close();
+    res.status(200).json({ html: content });
   } catch (err) {
     console.error('Scrape Error:', err.message);
     res.status(500).json({ error: 'Internal server error', details: err.message });
